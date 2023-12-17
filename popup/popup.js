@@ -69,16 +69,34 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     getTabInfo(tabId);
   }
 });
+function getCurrentTabID() {
+  if (chrome.tabs.getCurrent) {
+    return chrome.tabs.getCurrent().id;
+  }
+  return undefined;
+}
 
-chrome.scripting
-  .executeScript({
-    target: { tabId: cuTab.tabId },
-    files: ["/scripts/script.js"],
-  })
-  .then(() => console.log("script injected"));
+function onTabOpened(tab) {
+  // Obtener el ID del grupo de la pestaña actual.
+  const groupId = chrome.tabs.getGroup(tab.id);
+
+  // Si la pestaña actual está en un grupo.
+  if (groupId) {
+    // Desagrupar la pestaña.
+    chrome.tabs.removeFromGroup(tab.id, groupId);
+
+    // Mover la pestaña a la tercera posición.
+    chrome.tabs.move(tab.id, 2);
+  }
+}
+
+// Registrar el evento de apertura de pestaña.
+chrome.tabs.onUpdated.addListener(onTabOpened);
+
+
 
 const openBtn = document.querySelector("#openBtn");
-copyBtn.addEventListener("click", async () => {
+openBtn.addEventListener("click", async () => {
   const whap = window.open("https://web.whatsapp.com/");
   const agentes = window.open(
     "https://agentes.casino365online.net/account/login"
