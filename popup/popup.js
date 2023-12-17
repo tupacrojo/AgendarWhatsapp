@@ -44,11 +44,43 @@ copyBtn.addEventListener("click", async () => {
   }
 });
 
-function getTabId() { ... }
+async function getCurrentTab() {
+  let queryOptions = { active: true, lastFocusedWindow: true };
+  // tab will either be a tabs.Tab instance or undefined.
+  let [tab] = await chrome.tabs.query(queryOptions);
+  return tab;
+}
+
+let activeTabId, lastUrl, lastTitle;
+
+function getTabInfo(tabId) {
+  chrome.tabs.get(tabId, function (tab) {
+    if (lastUrl != tab.url || lastTitle != tab.title)
+      console.log((lastUrl = tab.url), (lastTitle = tab.title));
+  });
+}
+
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+  getTabInfo((activeTabId = activeInfo.tabId));
+});
+
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  if (activeTabId == tabId) {
+    getTabInfo(tabId);
+  }
+});
 
 chrome.scripting
-    .executeScript({
-      target : {tabId : getTabId()},
-      files : [ "script.js" ],
-    })
-    .then(() => console.log("script injected"));
+  .executeScript({
+    target: { tabId: cuTab.tabId },
+    files: ["/scripts/script.js"],
+  })
+  .then(() => console.log("script injected"));
+
+const openBtn = document.querySelector("#openBtn");
+copyBtn.addEventListener("click", async () => {
+  const whap = window.open("https://web.whatsapp.com/");
+  const agentes = window.open(
+    "https://agentes.casino365online.net/account/login"
+  );
+});
